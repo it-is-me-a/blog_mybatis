@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.emma.blog.mapper.CommentMapper">
+  <resultMap id="BaseResultMapComment" type="com.emma.blog.entity.Comment">
+    <id column="comment_id" jdbcType="INTEGER" property="id" />
+    <result column="comment_avatar" jdbcType="VARCHAR" property="avatar" />
+    <result column="comment_content" jdbcType="VARCHAR" property="content" />
+    <result column="comment_create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="comment_email" jdbcType="VARCHAR" property="email" />
+    <result column="comment_nick_name" jdbcType="VARCHAR" property="nickName" />
+    <result column="comment_admin_comment" jdbcType="BIT" property="adminComment" />
+    <association column="comment_blog_id" property="blog" select="com.emma.blog.mapper.BlogMapper.getBlogById" javaType="com.emma.blog.entity.Blog"></association>
+    <association column="comment_parent_comment_id" property="parentComment" select="com.emma.blog.mapper.CommentMapper.getCommentById" javaType="com.emma.blog.entity.Comment"></association>
+  </resultMap>
+  <!-- List<Comment>  findByBlogIdAndParentCommentNull(Integer blogId); -->
+  <select id="findByBlogIdAndParentCommentNull" resultMap="BaseResultMapComment" parameterType="java.lang.Integer">
+     select
+        t.id as comment_id,
+        t.avatar as comment_avatar,
+        t.content as comment_content,
+        t.create_time as comment_create_time,
+        t.email as comment_email,
+        t.nick_name as comment_nick_name,
+        t.blog_id as comment_blog_id,
+        t.parent_comment_id as comment_parent_comment_id,
+        t.admin_comment as comment_admin_comment
+     from t_comment t
+     left outer join t_blog b on t.blog_id=b.id
+     where b.id=#{blogId} and t.parent_comment_id is null
+     order by t.create_time asc
+  </select>
+  <!--Comment getCommentById(Integer id);-->
+  <select id="getCommentById" parameterType="java.lang.Integer" resultMap="BaseResultMapComment">
+    select
+      t.id as comment_id,
+      t.avatar as comment_avatar,
+      t.content as comment_content,
+      t.create_time as comment_create_time,
+      t.email as comment_email,
+      t.nick_name as comment_nick_name,
+      t.blog_id as comment_blog_id,
+      t.parent_comment_id as comment_parent_comment_id,
+      t.admin_comment as comment_admin_comment
+    from t_comment t
+    where t.id = #{id,jdbcType=INTEGER}
+  </select>
+  <resultMap id="BaseResultMapComment02" type="com.emma.blog.entity.Comment">
+    <id column="comment_id" jdbcType="INTEGER" property="id" />
+    <result column="comment_avatar" jdbcType="VARCHAR" property="avatar" />
+    <result column="comment_content" jdbcType="VARCHAR" property="content" />
+    <result column="comment_create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="comment_email" jdbcType="VARCHAR" property="email" />
+    <result column="comment_nick_name" jdbcType="VARCHAR" property="nickName" />
+    <result column="comment_admin_comment" jdbcType="BIT" property="adminComment" />
+    <association column="comment_blog_id" property="blog" select="com.emma.blog.mapper.BlogMapper.getBlogById" javaType="com.emma.blog.entity.Blog">
+      <id column="blog_id" jdbcType="INTEGER" property="id" />
+      <result column="blog_creat_time" jdbcType="TIMESTAMP" property="creatTime" />
+      <result column="blog_first_picture" jdbcType="VARCHAR" property="firstPicture" />
+      <result column="blog_title" jdbcType="VARCHAR" property="title" />
+      <result column="blog_views" jdbcType="INTEGER" property="views" />
+      <result column="blog_description" jdbcType="VARCHAR" property="description" />
+      <result column="blog_published" jdbcType="VARCHAR" property="published" />
+      <result column="blog_update_time" jdbcType="TIMESTAMP" property="updateTime" />
+      <result column="blog_flag" jdbcType="VARCHAR" property="flag" />
+      <result column="blog_recommend" jdbcType="BIT" property="recommend" />
+      <result column="blog_share_statement" jdbcType="BIT" property="shareStatement" />
+      <result column="blog_appreciation" jdbcType="BIT" property="appreciation" />
+      <result column="blog_commentabled" jdbcType="BIT" property="commentabled" />
+      <result column="blog_content" jdbcType="LONGVARCHAR" property="content" />
+      <association column="blog_user_id" property="user" javaType="com.emma.blog.entity.User">
+        <id column="user_id" jdbcType="INTEGER" property="id" />
+        <result column="user_avatar" jdbcType="VARCHAR" property="avatar" />
+        <result column="user_nick_name" jdbcType="VARCHAR" property="nickName" />
+        <result column="user_username" jdbcType="VARCHAR" property="username" />
+        <result column="user_email" jdbcType="VARCHAR" property="email" />
+        <result column="user_create_time" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="user_update_time" jdbcType="TIMESTAMP" property="updateTime" />
+      </association>
+      <!--type-->
+      <association column="blog_type_id" property="type" select="com.emma.blog.mapper.TypeMapper.selectByPrimaryKey" javaType="com.emma.blog.entity.Type">
+        <id column="type_id" jdbcType="INTEGER" property="id" />
+        <result column="type_type_name" jdbcType="VARCHAR" property="typeName" />
+      </association>
+    </association>
+    <association column="comment_parent_comment_id" property="parentComment" select="com.emma.blog.mapper.CommentMapper.getCommentById" javaType="com.emma.blog.entity.Comment"></association>
+  </resultMap>
+  <!--List<Comment> getChildCommentByParentId(Integer ParentId);-->
+  <select id="getChildCommentByParentId" parameterType="java.lang.Integer" resultMap="BaseResultMapComment02">
+    select        
+      c.id as comment_id,
+      c.admin_comment as comment_admin_comment,
+      c.avatar as comment_avatar,
+      c.blog_id as comment_blog_id,
+      c.content as comment_content,
+      c.create_time as comment_create_time,
+      c.email as comment_email,
+      c.nick_name as comment_nick_name,
+      c.parent_comment_id as comment_parent_comment_id,
+      b.id as blog_id,
+      b.appreciation as blog_appreciation,
+      b.commentabled as blog_commentabled,
+      b.content as blog_content,
+      b.description as blog_description,
+      b.first_picture as blog_first_picture,
+      b.flag as blog_flag,
+      b.recommend as blog_recommend,
+      b.share_statement as blog_share_statement,
+      b.update_time as blog_update_time,
+      b.user_id as blog_user_id,
+      b.views as blog_views,
+      b.creat_time as blog_creat_time,
+      b.title as blog_title,
+      b.type_id as blog_type_id,
+      b.published as blog_published,
+      u.id as user_id,
+      u.nick_name as user_nick_name,
+      u.create_time as user_create_time,
+      u.update_time as user_update_time,
+      u.avatar as user_avatar,
+      u.username as user_username,
+      u.email as user_email,
+      ty.id as type_id,
+      ty.type_name as type_type_name
+    from
+        t_comment c
+    left outer join
+        t_blog b
+            on c.blog_id=b.id
+    left outer join
+        t_type ty
+            on b.type_id=ty.id
+    left outer join
+        t_user u
+            on b.user_id=u.id
+    where
+        c.parent_comment_id=#{ParentId}
+  </select>
+  <resultMap id="BaseResultMapComment03" type="com.emma.blog.entity.Comment">
+    <id column="comment_id" jdbcType="INTEGER" property="id" />
+    <result column="comment_avatar" jdbcType="VARCHAR" property="avatar" />
+    <result column="comment_content" jdbcType="VARCHAR" property="content" />
+    <result column="comment_create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="comment_email" jdbcType="VARCHAR" property="email" />
+    <result column="comment_nick_name" jdbcType="VARCHAR" property="nickName" />
+    <result column="comment_admin_comment" jdbcType="BIT" property="adminComment" />
+    <association column="comment_blog_id" property="blog" select="com.emma.blog.mapper.BlogMapper.getBlogById" javaType="com.emma.blog.entity.Blog">
+      <id column="blog_id" jdbcType="INTEGER" property="id" />
+      <result column="blog_creat_time" jdbcType="TIMESTAMP" property="creatTime" />
+      <result column="blog_first_picture" jdbcType="VARCHAR" property="firstPicture" />
+      <result column="blog_title" jdbcType="VARCHAR" property="title" />
+      <result column="blog_views" jdbcType="INTEGER" property="views" />
+      <result column="blog_description" jdbcType="VARCHAR" property="description" />
+      <result column="blog_published" jdbcType="VARCHAR" property="published" />
+      <result column="blog_update_time" jdbcType="TIMESTAMP" property="updateTime" />
+      <result column="blog_flag" jdbcType="VARCHAR" property="flag" />
+      <result column="blog_recommend" jdbcType="BIT" property="recommend" />
+      <result column="blog_share_statement" jdbcType="BIT" property="shareStatement" />
+      <result column="blog_appreciation" jdbcType="BIT" property="appreciation" />
+      <result column="blog_commentabled" jdbcType="BIT" property="commentabled" />
+      <result column="blog_content" jdbcType="LONGVARCHAR" property="content" />
+      <association column="blog_user_id" property="user" javaType="com.emma.blog.entity.User">
+        <id column="user_id" jdbcType="INTEGER" property="id" />
+        <result column="user_avatar" jdbcType="VARCHAR" property="avatar" />
+        <result column="user_nick_name" jdbcType="VARCHAR" property="nickName" />
+        <result column="user_username" jdbcType="VARCHAR" property="username" />
+        <result column="user_email" jdbcType="VARCHAR" property="email" />
+     </association>
+      <!--type-->
+      <association column="blog_type_id" property="type" select="com.emma.blog.mapper.TypeMapper.selectByPrimaryKey" javaType="com.emma.blog.entity.Type">
+        <id column="type_id" jdbcType="INTEGER" property="id" />
+        <result column="type_type_name" jdbcType="VARCHAR" property="typeName" />
+      </association>
+    </association>
+    <association column="comment_parent_comment_id" property="parentComment" select="com.emma.blog.mapper.CommentMapper.getCommentById" javaType="com.emma.blog.entity.Comment">
+        <id column="parent_id" jdbcType="INTEGER" property="id" />
+        <result column="parent_avatar" jdbcType="VARCHAR" property="avatar" />
+        <result column="parent_content" jdbcType="VARCHAR" property="content" />
+        <result column="parent_create_time" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="parent_email" jdbcType="VARCHAR" property="email" />
+        <result column="parent_nick_name" jdbcType="VARCHAR" property="nickName" />
+        <result column="parent_admin_comment" jdbcType="BIT" property="adminComment" />
+        <association column="comment_parent_comment_id" property="parentComment" select="com.emma.blog.mapper.CommentMapper.getCommentById" javaType="com.emma.blog.entity.Comment"></association>
+    </association>
+  </resultMap>
+  <!--Blog getParentCommentByCommentId(Integer id);-->
+  <select id="getParentCommentByCommentId" parameterType="java.lang.Integer" resultMap="BaseResultMapComment02">
+   select
+        comment0_.id as comment_id,
+        comment0_.admin_comment as comment_admin_comment,
+        comment0_.avatar as comment_avatar,
+        comment0_.blog_id as comment_blog_id,
+        comment0_.content as comment_content,
+        comment0_.create_time as comment_create_time,
+        comment0_.email as comment_email,
+        comment0_.nick_name as comment_nick_name,
+        comment0_.parent_comment_id as comment_parent_comment_id,
+        b.id as blog_id,
+        b.appreciation as blog_appreciation,
+        b.commentabled as blog_commentabled,
+        b.content as blog_content,
+        b.creat_time as blog_creat_time,
+        b.update_time as blog_update_time,
+        b.first_picture as blog_first_picture,
+        b.flag as blog_flag,
+        b.published as blog_published,
+        b.recommend as blog_recommend,
+        b.share_statement as blog_share_statement,
+        b.title as blog_title,
+        b.views as blog_views,
+        b.description as blog_description,
+        b.user_id as blog_user_id,
+        b.type_id as blog_type_id,
+        u.id as user_id,
+        u.nick_name as user_nick_name,
+        u.avatar as user_avatar,
+        u.username as user_username,
+        u.email as user_email,
+        ty.id as type_id,
+        ty.type_name as type_type_name,
+        comment4_.id as parent_id,
+        comment4_.admin_comment as parent_admin_comment,
+        comment4_.avatar as parent_avatar,
+        comment4_.content as parent_content,
+        comment4_.create_time as parent_create_time,
+        comment4_.email as parent_email,
+        comment4_.nick_name as parent_nick_name,
+        comment4_.parent_comment_id as parent_parent_comment_id
+    from
+        t_comment comment0_
+    left outer join
+        t_blog b on comment0_.blog_id=b.id
+    left outer join
+        t_type ty on b.type_id=ty.id
+    left outer join
+        t_user u  on b.user_id=u.id
+    left outer join
+        t_comment comment4_
+            on comment0_.parent_comment_id=comment4_.id
+    where
+        comment0_.id=#{id}
+   </select>
+  <!--int insertSelective(Comment record);-->
+  <insert id="insertSelective" parameterType="com.emma.blog.entity.Comment" useGeneratedKeys="true" keyProperty="id">
+    insert into t_comment
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="avatar != null">
+        avatar,
+      </if>
+      <if test="content != null">
+        content,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="email != null">
+        email,
+      </if>
+      <if test="nickName != null">
+        nick_name,
+      </if>
+      <if test="blog != null">
+        blog_id,
+      </if>
+      <if test="parentComment != null">
+        parent_comment_id,
+      </if>
+      <if test="adminComment != null">
+        admin_comment,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="avatar != null">
+        #{avatar,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null">
+        #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="email != null">
+        #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="nickName != null">
+        #{nickName,jdbcType=VARCHAR},
+      </if>
+      <if test="blog != null">
+        #{blog.id,jdbcType=INTEGER},
+      </if>
+      <if test="parentComment != null">
+        #{parentComment.id,jdbcType=INTEGER},
+      </if>
+      <if test="adminComment != null">
+        #{adminComment,jdbcType=BIT},
+      </if>
+    </trim>
+  </insert>
+  <!-- <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from t_comment
+    where id = #{id,jdbcType=INTEGER}
+  </delete>-->
+<!--  <update id="updateByPrimaryKeySelective" parameterType="com.emma.blog.entity.Comment">
+    update t_comment
+    <set>
+      <if test="avatar != null">
+        avatar = #{avatar,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null">
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="email != null">
+        email = #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="nickName != null">
+        nick_name = #{nickName,jdbcType=VARCHAR},
+      </if>
+      <if test="blogId != null">
+        blog_id = #{blogId,jdbcType=INTEGER},
+      </if>
+      <if test="parentCommentId != null">
+        parent_comment_id = #{parentCommentId,jdbcType=INTEGER},
+      </if>
+      <if test="adminComment != null">
+        admin_comment = #{adminComment,jdbcType=BIT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>-->
+</mapper>

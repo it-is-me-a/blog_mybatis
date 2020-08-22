@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.emma.blog.mapper.TagMapper">
+  <resultMap id="BaseResultMapTag" type="com.emma.blog.entity.Tag">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="tag_name" jdbcType="VARCHAR" property="tagName" />
+  </resultMap>  
+  <resultMap extends="BaseResultMapTag" id="ResultMapWithBLOBsTag" type="com.emma.blog.entity.Type">
+    <collection property="blogs" ofType="com.emma.blog.entity.Blog">
+      <id column="blog_id" jdbcType="INTEGER" property="id" />
+      <result column="blog_creat_time" jdbcType="TIMESTAMP" property="creatTime" />
+      <result column="blog_first_picture" jdbcType="VARCHAR" property="firstPicture" />
+      <result column="blog_title" jdbcType="VARCHAR" property="title" />
+      <result column="blog_views" jdbcType="INTEGER" property="views" />
+      <result column="blog_description" jdbcType="VARCHAR" property="description" />
+      <!--User-->
+      <association column="blog_user_id" property="user" javaType="com.emma.blog.entity.User">
+        <id column="user_id" jdbcType="INTEGER" property="id" />
+        <result column="user_avatar" jdbcType="VARCHAR" property="avatar" />
+        <result column="user_nick_name" jdbcType="VARCHAR" property="nickName" />
+        <result column="user_username" jdbcType="VARCHAR" property="username" />
+        <result column="user_email" jdbcType="VARCHAR" property="email" />
+      </association>
+    </collection>
+  </resultMap>
+  <!--Tag selectByPrimaryKey(Integer id);-->
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultType="com.emma.blog.entity.Tag">
+    select
+      t.id, t.tag_name
+    from t_tag t
+    where t.id = #{id,jdbcType=INTEGER}
+  </select>
+  <!--int CountTag();-->
+  <select id="CountTag()" resultType="java.lang.Integer">
+    select count(t.id) from t_tag t
+  </select>
+  <!-- Page<Tag> findAll();-->
+  <select id="findAll" resultType="com.emma.blog.entity.Tag" >
+    select * from t_tag
+  </select>
+  <!-- Tag findByTagName(String tagName);-->
+  <select id="findByTagName" parameterType="java.lang.String" resultType="com.emma.blog.entity.Tag">
+    <bind name="pattern" value="'%' + tagName + '%'" />
+    select * from t_tag t where t.tag_name like #{pattern}
+  </select>
+  <!--List<Tag> findAllById(List<Integer> ids);-->
+  <select id="findAllById" parameterType="java.util.List" resultType="com.emma.blog.entity.Tag">
+      select *
+      from t_tag
+      where id in
+      <foreach collection="ids" item="item" separator="," open="(" close=")">
+        #{item}
+      </foreach>
+  </select>
+  <!--List<Tag> listTagByBlogId(Integer blogId)-->
+  <select id="listTagByBlogId" parameterType="java.lang.Integer" resultType="Type">
+    select
+      bt.blogs_id as blogs_id,
+      bt.tags_id as ,
+      t.id,
+      t.tag_name
+    from t_blog_tags bt
+    inner join t_tag t on bt.tags_id=t.id
+    where bt.blogs_id = #{blogId}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from t_tag
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <!--void deleteBlogAndTag(Integer tagId);-->
+  <delete id="deleteBlogAndTag" parameterType="java.lang.Integer">
+    delete from t_blog_tags
+    where tags_id=#{tagId}
+  </delete>
+  <insert id="insert" parameterType="com.emma.blog.entity.Tag" useGeneratedKeys="true" keyProperty="id">
+    insert into t_tag (id, tag_name)
+    values (#{id,jdbcType=INTEGER}, #{tagName,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.emma.blog.entity.Tag" useGeneratedKeys="true" keyProperty="id">
+    insert into t_tag
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="tagName != null">
+        tag_name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="tagName != null">
+        #{tagName,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.emma.blog.entity.Tag">
+    update t_tag
+    <set>
+      <if test="tagName != null">
+        tag_name = #{tagName,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.emma.blog.entity.Tag">
+    update t_tag
+    set tag_name = #{tagName,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

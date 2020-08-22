@@ -1,0 +1,25 @@
+spring:
+  thymeleaf:
+    mode: HTML
+  profiles:
+    active: dev
+  messages:
+    basename: i18n/messages #如果配置文件不直接在在resources文件夹下，用来指定配置文件的位置
+
+
+comment.avatar : /img/avatar.jpg
+
+# pageHelper 分页配置
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+  params: count=countSql
+
+# mybatis
+mybatis:
+  mapper-locations: classpath:com/emma/blog/mapper/*.xml
+  type-aliases-package: com/emma/blog/entity
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 输出SQL到控制台
+    map-underscore-to-camel-case: true  # 开启驼峰命名法
